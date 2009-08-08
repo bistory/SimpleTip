@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<title>Application Demo</title>
+		<!-- CSS inclusion -->
+		<link type="text/css" rel="stylesheet" href="simpletip/simpletip.css" />
+		<!-- JS libraries inclusion -->
+		<script type="text/javascript" src="libraries/prototype.js"></script>
+		<script type="text/javascript" src="libraries/scriptaculous.js"></script>
+		<script type="text/javascript" src="simpletip/simpletip.js"></script>
+		
+		<!-- Init script -->
+		<script type="text/javascript">
+			Event.observe(window, 'load', function () {
+				$('dragged').setTip('Hey ! Click me and I\'ll disappear !');
+				$('tipped').showTip('Hey ! Click me and I\'ll disappear !');
+				$('left-tipped').showTip('Hey ! Click me and I\'ll disappear !',{hPos: 'left'});
+				$('top-tipped').showTip('Hey ! Click me and I\'ll disappear !',{vPos: 'top'});
+				$('top-left-tipped').showTip('Hey ! Click me and I\'ll disappear !',{hPos: 'left', vPos: 'top'});
+			});
+		</script>
+	</head>
+	<body>
+		<div id="dragged" style="border: 1px solid #000; height: 100px; width: 100px">Drag your mouse here !</div>
+		<div id="tipped" style="border: 1px solid #000; height: 100px; width: 100px; margin-left: 50px; margin-top: 50px">Hey ! I'm tipped !</div>
+		<div id="left-tipped" style="border: 1px solid #000; height: 100px; width: 100px; margin-left: 250px; margin-top: 50px">Hey ! I'm left-tipped !</div>
+		<div id="top-tipped" style="border: 1px solid #000; height: 100px; width: 100px; margin-left: 250px; margin-top: 50px">Hey ! I'm top-tipped !</div>
+		<div id="top-left-tipped" style="border: 1px solid #000; height: 100px; width: 100px; margin-left: 250px; margin-top: 50px">Hey ! I'm top-left-tipped !</div>
+	</body>
+</html>
