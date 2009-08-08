@@ -5,22 +5,17 @@ var SimpleTip = {
 	yOffset: 25,
 	affiche: false,
 	
-	start: function () {
-		SimpleTip.bulle = new Element('div', {id: 'infobulle', 'class': 'fg-tooltip fg-tooltip-left'}).insert(
-				new Element('div', {'class': 'tooltip-content'})
-			)
-			.insert(
-				new Element('div', {'class': 'fg-tooltip-pointer-down'}).insert(
-					new Element('div', {'class': 'fg-tooltip-pointer-down-inner'})
-				)
-			);
+	start: function() {
+		SimpleTip.bulle = new Element('div', {id: 'infobulle', 'class': 'fg-tooltip fg-tooltip-left'})
+		.update('<div class="tooltip-content"></div><div class="fg-tooltip-pointer-down"><div class="fg-tooltip-pointer-down-inner"></div></div>');
+			
 		SimpleTip.descendants = SimpleTip.bulle.descendants();
 			
-		Event.observe(document, 'dom:loaded', function () {
-			$$('body')[0].insert(SimpleTip.bulle);
+		Event.observe(document, 'dom:loaded', function() {
+			document.body.appendChild(SimpleTip.bulle);
 			document.observe('mousemove', SimpleTip._moveTip);
-			/*$('inheader').showTip('Machin');
-			$$('body')[0].observe('click', SimpleTip.hideAllTips);*/
+			/*$('inheader').showTip('Machin', {hPos: 'left'});
+			document.body.observe('click', SimpleTip.hideAllTips);*/
 		});
 	},
 
@@ -37,14 +32,14 @@ var SimpleTip = {
 		}
 	},
 	
-	_showTip: function (text) {
-		SimpleTip.descendants[0].update(text);
+	_showTip: function(text) {
+		SimpleTip.bulle.firstChild.update(text);
 		SimpleTip.affiche = true;
 	},
 	
-	_hideTip: function () {
+	_hideTip: function() {
 		SimpleTip.affiche = false;
-		SimpleTip.bulle.setStyle({visibility: 'hidden'});
+		SimpleTip.bulle.style.visibility = 'hidden';
 	}
 };
 
@@ -64,32 +59,47 @@ var Tips = {
 		return element;
 	},
 
-	showTip: function(element, text) {
+	showTip: function(element, text, options) {
 		element = $(element);
-		if (typeof element.tooltip == 'undefined') {
+		if (typeof options == 'undefined') {
+			options = {};
+		}
+		if(typeof element.tooltip == 'undefined') {
 			element.tooltip = SimpleTip.bulle.cloneNode(true);
 			
 			var position = element.viewportOffset();
 			
-			with (element.tooltip) {
+			with(element.tooltip) {
 				id = null;
 				hide();
 				addClassName('duplicatedtip');
-				descendants()[0].update(text);
+				firstChild.update(text);
 				
-				_setTipPosition(position[0], position[1]);
-				observe('click', element.hideTip);
+				observe('click', function(){
+					element.hideTip()
+				});
 			};
 			
-			$$('body')[0].insert(element.tooltip);
+			document.body.appendChild(element.tooltip);
+			element.tooltip._setTipPosition(position[0], position[1], options);
 		}
 		new SimpleTip.showEffect(element.tooltip);
 		
 		return element;
 	},
 	
-	_setTipPosition: function (element, curX, curY) {
+	_setTipPosition: function(element, curX, curY, options) {
 		element = $(element);
+		
+		if (typeof options == 'undefined') {
+			options = {};
+		}
+		if (typeof options.vPos == 'undefined') {
+			options.vPos = false;
+		}
+		if (typeof options.hPos == 'undefined') {
+			options.hPos = false;
+		}
 		
 		var descendants = element.descendants();
 		
@@ -109,7 +119,7 @@ var Tips = {
 		}
 		
 		// Horizontal
-		if(rightedge < curX) {
+		if((rightedge < curX || options.hPos == 'left') && options.hPos != 'right') {
 			// Left from the position
 			style.left = curX - element.getWidth() + 'px';
 			
@@ -126,7 +136,7 @@ var Tips = {
 		}
 		
 		// Vertical
-		if(bottomedge < element.offsetHeight) {
+		if((bottomedge < element.offsetHeight || options.vPos == 'top') && options.vPos != 'bottom') {
 			// Top from the position
 			style.top = curY - element.getHeight() - SimpleTip.yOffset + 'px';
 			
