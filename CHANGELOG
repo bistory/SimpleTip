@@ -1,3 +1,9 @@
+*0.1.1* (August 8, 2009)
+
+* Add a small example page to show the different functions of SimpleTip
+* Fixes a bug that makes the tips to be badly positionned when page is scrolled
+* Add prototype and scriptaculous libraries
+
 *0.1.0* (July 29, 2009)
  
 * First public version
