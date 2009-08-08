@@ -67,7 +67,7 @@ var Tips = {
 		if(typeof element.tooltip == 'undefined') {
 			element.tooltip = SimpleTip.bulle.cloneNode(true);
 			
-			var position = element.viewportOffset();
+			var position = element.positionedOffset();
 			
 			with(element.tooltip) {
 				id = null;
@@ -121,7 +121,7 @@ var Tips = {
 		// Horizontal
 		if((rightedge < curX || options.hPos == 'left') && options.hPos != 'right') {
 			// Left from the position
-			style.left = curX - element.getWidth() + 'px';
+			style.left = curX - element.getWidth() + SimpleTip.xOffset + 'px';
 			
 			element.removeClassName('fg-tooltip-left').addClassName('fg-tooltip-right');
 		} else {
@@ -138,7 +138,7 @@ var Tips = {
 		// Vertical
 		if((bottomedge < element.offsetHeight || options.vPos == 'top') && options.vPos != 'bottom') {
 			// Top from the position
-			style.top = curY - element.getHeight() - SimpleTip.yOffset + 'px';
+			style.top = curY - element.getHeight() + 'px';
 			
 			descendants[1].className = 'fg-tooltip-pointer-down';
 			descendants[2].className = 'fg-tooltip-pointer-down-inner';
