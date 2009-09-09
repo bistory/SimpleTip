@@ -1,96 +1,39 @@
-var SimpleTip = {
-	showEffect: Effect.Appear,
-	hideEffect: Effect.Fade,
-	xOffset: 6,
-	yOffset: 25,
-	affiche: false,
-	
-	start: function() {
-		SimpleTip.bulle = new Element('div', {id: 'infobulle', 'class': 'fg-tooltip fg-tooltip-left'})
+var SimpleTip = Class.create({
+	initialize: function() {
+		this.bulle = new Element('div', {'class': 'fg-tooltip fg-tooltip-left'})
 		.update('<div class="tooltip-content"></div><div class="fg-tooltip-pointer-down"><div class="fg-tooltip-pointer-down-inner"></div></div>');
-			
-		SimpleTip.descendants = SimpleTip.bulle.descendants();
-			
+		
+		this.descendants = this.bulle.descendants();
+		this.affiche = false;
+		this.xOffset = 6;
+		this.yOffset = 25;
+		this.showEffect = Effect.Appear;
+		this.hideEffect = Effect.Fade;
+	},
+	
+	listen: function() {
 		Event.observe(document, 'dom:loaded', function() {
-			document.body.appendChild(SimpleTip.bulle);
-			document.observe('mousemove', SimpleTip._moveTip);
-			/*$('inheader').showTip('Machin', {hPos: 'left'});
-			document.body.observe('click', SimpleTip.hideAllTips);*/
-		});
-	},
-
-	hideAllTips: function() {
-		if(SimpleTip.hideEffect)
-		{
-			$$('.duplicatedtip').each(SimpleTip.hideEffect);
-		}
+			this.bulle.id = 'infobulle';
+			document.body.appendChild(this.bulle);
+			document.observe('mousemove', function(event) {
+				if(this.affiche) {
+					this.setPosition(event.pointerX(), event.pointerY());
+				}
+			}.bindAsEventListener(this));
+		}.bindAsEventListener(this));
 	},
 	
-	_moveTip: function(event) {
-		if(SimpleTip.affiche) {
-			SimpleTip.bulle._setTipPosition(Event.pointerX(event), Event.pointerY(event));
-		}
+	show: function(text) {
+		this.descendants[0].update(text);
+		this.affiche = true;
 	},
 	
-	_showTip: function(text) {
-		SimpleTip.bulle.firstChild.update(text);
-		SimpleTip.affiche = true;
+	hide: function() {
+		this.affiche = false;
+		this.bulle.style.visibility = 'hidden';
 	},
 	
-	_hideTip: function() {
-		SimpleTip.affiche = false;
-		SimpleTip.bulle.style.visibility = 'hidden';
-	}
-};
-
-var Tips = {
-	setTip: function(element, text) {
-		element = $(element);
-		element.observe('mouseenter', function() {
-			SimpleTip._showTip(text);
-		});
-		
-		element.observe('mouseleave', SimpleTip._hideTip);
-	},
-
-	hideTip: function(element) {
-		element = $(element);
-		new SimpleTip.hideEffect(element.tooltip);
-		return element;
-	},
-
-	showTip: function(element, text, options) {
-		element = $(element);
-		if (typeof options == 'undefined') {
-			options = {};
-		}
-		if(typeof element.tooltip == 'undefined') {
-			element.tooltip = SimpleTip.bulle.cloneNode(true);
-			
-			var position = element.positionedOffset();
-			
-			with(element.tooltip) {
-				id = null;
-				hide();
-				addClassName('duplicatedtip');
-				firstChild.update(text);
-				
-				observe('click', function(){
-					element.hideTip()
-				});
-			};
-			
-			document.body.appendChild(element.tooltip);
-			element.tooltip._setTipPosition(position[0], position[1], options);
-		}
-		new SimpleTip.showEffect(element.tooltip);
-		
-		return element;
-	},
-	
-	_setTipPosition: function(element, curX, curY, options) {
-		element = $(element);
-		
+	setPosition: function(curX, curY, options) {
 		if (typeof options == 'undefined') {
 			options = {};
 		}
@@ -101,60 +44,95 @@ var Tips = {
 			options.hPos = false;
 		}
 		
-		var descendants = element.descendants();
+		var style = {visibility: 'visible'},
+			winsize = document.viewport.getDimensions(),
+			rightedge = winsize.width - curX - this.xOffset,
+			bottomedge = winsize.height - curY - this.yOffset,
+			leftedge = (this.xOffset < 0) ? this.xOffset*(-1) : -1000;
 		
-		var style = {
-			visibility: 'visible'
-		};
-		
-		var winsize = document.viewport.getDimensions();
-		
-		var rightedge = winsize.width - curX - SimpleTip.xOffset;
-		var bottomedge = winsize.height - curY - SimpleTip.yOffset;
-		
-		var leftedge = (SimpleTip.xOffset < 0) ? SimpleTip.xOffset*(-1) : -1000;
-		
-		if(element.offsetWidth > winsize.width / 3) {
+		if(this.bulle.offsetWidth > winsize.width / 3) {
 			style.width = winsize.width / 3;
 		}
 		
 		// Horizontal
 		if((rightedge < curX || options.hPos == 'left') && options.hPos != 'right') {
 			// Left from the position
-			style.left = curX - element.getWidth() + SimpleTip.xOffset + 'px';
+			style.left = curX - this.bulle.getWidth() + this.xOffset + 'px';
 			
-			element.removeClassName('fg-tooltip-left').addClassName('fg-tooltip-right');
+			this.bulle.removeClassName('fg-tooltip-left').addClassName('fg-tooltip-right');
 		} else {
 			// Right from the position
 			if(curX < leftedge) {
 				style.left = '5px';
 			} else {
-				style.left = curX + SimpleTip.xOffset + 'px';
+				style.left = curX + this.xOffset + 'px';
 			}
 			
-			element.removeClassName('fg-tooltip-right').addClassName('fg-tooltip-left');
+			this.bulle.removeClassName('fg-tooltip-right').addClassName('fg-tooltip-left');
 		}
 		
 		// Vertical
-		if((bottomedge < element.offsetHeight || options.vPos == 'top') && options.vPos != 'bottom') {
+		if((bottomedge < this.bulle.offsetHeight || options.vPos == 'top') && options.vPos != 'bottom') {
 			// Top from the position
-			style.top = curY - element.getHeight() + 'px';
+			style.top = curY - this.bulle.getHeight() + 'px';
 			
-			descendants[1].className = 'fg-tooltip-pointer-down';
-			descendants[2].className = 'fg-tooltip-pointer-down-inner';
+			this.descendants[1].className = 'fg-tooltip-pointer-down';
+			this.descendants[2].className = 'fg-tooltip-pointer-down-inner';
 		} else {
 			// Bottom from the position
-			style.top = curY + SimpleTip.yOffset + 'px';
+			style.top = curY + this.yOffset + 'px';
 			
-			descendants[1].className = 'fg-tooltip-pointer-up';
-			descendants[2].className = 'fg-tooltip-pointer-up-inner';
+			this.descendants[1].className = 'fg-tooltip-pointer-up';
+			this.descendants[2].className = 'fg-tooltip-pointer-up-inner';
 		}
 		
-		element.setStyle(style);
+		this.bulle.setStyle(style);
+	}
+});
+
+var Tips = {
+	setTip: function(element, text) {
+		$(element).observe('mouseenter', function(){
+			sTip.show(text);
+		})
+				  .observe('mouseleave', sTip.hide.bind(sTip));
+	},
+
+	hideTip: function(element) {
+		element = $(element);
+		new sTip.hideEffect(element.tooltip.bulle);
+		return element;
+	},
+
+	showTip: function(element, text, options) {
+		element = $(element);
+		if (typeof options == 'undefined') {
+			options = {};
+		}
+		if(typeof element.tooltip == 'undefined') {
+			element.tooltip = new SimpleTip();
+			
+			with(element.tooltip.bulle) {
+				hide();
+				addClassName('duplicatedtip');
+				
+				observe('click', function(){
+					element.hideTip()
+				});
+			};
+			document.body.appendChild(element.tooltip.bulle);
+			
+			var position = element.positionedOffset();
+			element.tooltip.show(text);
+			element.tooltip.setPosition(position[0], position[1], options);
+		}
+		new sTip.showEffect(element.tooltip.bulle);
 		
 		return element;
 	}
 };
-Element.addMethods(Tips);
 
-SimpleTip.start();
+sTip = new SimpleTip();
+sTip.listen();
+
+Element.addMethods(Tips);
