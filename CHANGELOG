@@ -1,3 +1,8 @@
+*0.2.0* (September 9, 2009)
+
+* Big code cleanup, the result is a smaller and simpler library
+* Fix a bug in Opera that no text is displayed in the Tip !
+
 *0.1.1* (August 8, 2009)
 
 * Add a small example page to show the different functions of SimpleTip
