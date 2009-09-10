@@ -34,10 +34,6 @@ var SimpleTip = Class.create({
 		this.bulle.style.visibility = 'hidden';
 	},
 	
-	opacity: function() {
-		$$('.statictip')
-	},
-	
 	setPosition: function(curX, curY, options) {
 		if (typeof options == 'undefined') {
 			options = {};
