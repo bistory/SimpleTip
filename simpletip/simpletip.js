@@ -12,6 +12,7 @@ var SimpleTip = Class.create({
 	},
 	
 	listen: function() {
+		this.bulle.style.zIndex = 10001;
 		Event.observe(document, 'dom:loaded', function() {
 			this.bulle.id = 'infobulle';
 			document.body.appendChild(this.bulle);
@@ -31,6 +32,10 @@ var SimpleTip = Class.create({
 	hide: function() {
 		this.affiche = false;
 		this.bulle.style.visibility = 'hidden';
+	},
+	
+	opacity: function() {
+		$$('.statictip')
 	},
 	
 	setPosition: function(curX, curY, options) {
@@ -92,9 +97,7 @@ var SimpleTip = Class.create({
 
 var Tips = {
 	setTip: function(element, text) {
-		$(element).observe('mouseenter', function(){
-			sTip.show(text);
-		})
+		$(element).observe('mouseenter', function() { sTip.show(text); })
 				  .observe('mouseleave', sTip.hide.bind(sTip));
 	},
 
@@ -106,15 +109,12 @@ var Tips = {
 
 	showTip: function(element, text, options) {
 		element = $(element);
-		if (typeof options == 'undefined') {
-			options = {};
-		}
 		if(typeof element.tooltip == 'undefined') {
 			element.tooltip = new SimpleTip();
 			
 			with(element.tooltip.bulle) {
 				hide();
-				addClassName('duplicatedtip');
+				addClassName('statictip');
 				
 				observe('click', function(){
 					element.hideTip()
