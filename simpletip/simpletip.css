@@ -4,8 +4,9 @@
 	width: 12em;
 	border-width: 2px !important;
 	position: absolute;
-	z-index: 9999;
 	
+	text-align: left !important;
+	font: normal 11px verdana,arial,helvetica,sans-serif !important;
 	background-color: #333;
 	color: #FFF;
 	-moz-border-radius: 5px;
