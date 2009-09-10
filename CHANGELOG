@@ -1,6 +1,6 @@
 *0.2.1* (September 10, 2009)
 
-* Reduce the size of the library a little
+* Added collision detection ! (fade the older tip when a tip comes over it)
 
 *0.2.0* (September 9, 2009)
 
