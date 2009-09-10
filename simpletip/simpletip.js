@@ -4,7 +4,7 @@ var SimpleTip = Class.create({
 		.update('<div class="tooltip-content"></div><div class="fg-tooltip-pointer-down"><div class="fg-tooltip-pointer-down-inner"></div></div>');
 		
 		this.descendants = this.bulle.descendants();
-		this.affiche = false;
+		this.shown = false;
 		this.xOffset = 6;
 		this.yOffset = 25;
 		this.showEffect = Effect.Appear;
@@ -12,38 +12,56 @@ var SimpleTip = Class.create({
 	},
 	
 	listen: function() {
-		this.bulle.style.zIndex = 10001;
-		Event.observe(document, 'dom:loaded', function() {
+		this.bulle.style.zIndex = 6001;
+		document.observe('dom:loaded', function() {
 			this.bulle.id = 'infobulle';
 			document.body.appendChild(this.bulle);
 			document.observe('mousemove', function(event) {
-				if(this.affiche) {
-					this.setPosition(event.pointerX(), event.pointerY());
-				}
+				if(this.shown) this.setPosition(event.pointerX(), event.pointerY());
 			}.bindAsEventListener(this));
 		}.bindAsEventListener(this));
 	},
 	
 	show: function(text) {
 		this.descendants[0].update(text);
-		this.affiche = true;
+		this.shown = true;
+		this.getPosition();
 	},
 	
 	hide: function() {
-		this.affiche = false;
+		this.shown = false;
 		this.bulle.style.visibility = 'hidden';
+		$$('.tooltipped').each(function (e) {
+			e.tooltip.setOpacity(1);
+		});
+	},
+	
+	opacity: function() {
+		this.getPosition();
+		$$('.tooltipped').each(function (e) {
+			var pos = e.tooltip.bulle.pos;
+			if( !(this.bulle.pos.left > pos.right || this.bulle.pos.right < pos.left || this.bulle.pos.top > pos.bottom || this.bulle.pos.bottom < pos.top) )
+				e.tooltip.setOpacity(.5);
+			else
+				e.tooltip.setOpacity(1);
+		}, this);
+	},
+	
+	setOpacity: function (t) {
+		var op = this.bulle.getStyle('opacity');
+		if(((t == 1 && op < 1) || (t == .5 && op > .5)) && this.effect.options.to != t) {
+			this.effect.cancel();
+			this.effect = new Effect.Fade(this.bulle, {from: op, to: t, duration: .2});
+		}
 	},
 	
 	setPosition: function(curX, curY, options) {
-		if (typeof options == 'undefined') {
+		if (typeof options == 'undefined')
 			options = {};
-		}
-		if (typeof options.vPos == 'undefined') {
+		if (typeof options.vPos == 'undefined')
 			options.vPos = false;
-		}
-		if (typeof options.hPos == 'undefined') {
+		if (typeof options.hPos == 'undefined')
 			options.hPos = false;
-		}
 		
 		var style = {visibility: 'visible'},
 			winsize = document.viewport.getDimensions(),
@@ -51,9 +69,8 @@ var SimpleTip = Class.create({
 			bottomedge = winsize.height - curY - this.yOffset,
 			leftedge = (this.xOffset < 0) ? this.xOffset*(-1) : -1000;
 		
-		if(this.bulle.offsetWidth > winsize.width / 3) {
+		if(this.bulle.offsetWidth > winsize.width / 3)
 			style.width = winsize.width / 3;
-		}
 		
 		// Horizontal
 		if((rightedge < curX || options.hPos == 'left') && options.hPos != 'right') {
@@ -88,6 +105,22 @@ var SimpleTip = Class.create({
 		}
 		
 		this.bulle.setStyle(style);
+		
+		if(!this.bulle.hasClassName('statictip'))
+		{
+			this.opacity();
+		}
+	},
+	
+	getPosition: function () {
+		var size = this.bulle.getDimensions(),
+			p = this.bulle.positionedOffset();
+		this.bulle.pos = {
+			left: p.left,
+			right: p.left + size.width,
+			top: p.top,
+			bottom: p.top + size.height
+		}
 	}
 });
 
@@ -108,21 +141,19 @@ var Tips = {
 		if(typeof element.tooltip == 'undefined') {
 			element.tooltip = new SimpleTip();
 			
-			with(element.tooltip.bulle) {
-				hide();
-				addClassName('statictip');
-				
-				observe('click', function(){
+			element.addClassName('tooltipped');
+			element.tooltip.bulle.hide()
+				.addClassName('statictip')
+				.observe('click', function(){
 					element.hideTip()
 				});
-			};
 			document.body.appendChild(element.tooltip.bulle);
 			
 			var position = element.positionedOffset();
 			element.tooltip.show(text);
 			element.tooltip.setPosition(position[0], position[1], options);
 		}
-		new sTip.showEffect(element.tooltip.bulle);
+		element.tooltip.effect = new sTip.showEffect(element.tooltip.bulle, {afterFinish: function () {element.tooltip.getPosition();} });
 		
 		return element;
 	}
